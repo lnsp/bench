@@ -4,7 +4,7 @@ install:
 - go get github.com/aktau/github-release
 notifications:
   email: false
-after_success:
+before_deploy:
 - "scripts/build_archives.sh"
 deploy:
   provider: releases
