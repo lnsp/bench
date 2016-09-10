@@ -15,6 +15,7 @@ import (
 )
 
 var (
+	PoolSize        = flag.Int("worker", 1, "Async worker count")
 	PatchSource     = flag.String("source", "", "Set patch source")
 	TargetDirectory = flag.String("target", ".", "Set custom working directory")
 	VerboseOutput   = flag.Bool("verbose", false, "Enable verbose output")
@@ -41,7 +42,8 @@ Available actions:
 Available flags:
 	--target - Set custom working directory
 	--verbose - Enable verbose output
-	--source - Set patch source`
+	--source - Set patch source
+	--worker - Async worker count (default 1)`
 )
 
 func main() {
@@ -55,7 +57,7 @@ func main() {
 	case "generate":
 		lib.Generate(workingDir, *PatchSource)
 	case "fetch":
-		lib.Fetch(workingDir, *PatchSource)
+		lib.Fetch(workingDir, *PatchSource, *PoolSize)
 	case "version":
 		printVersion()
 	case "help":

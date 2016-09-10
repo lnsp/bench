@@ -7,6 +7,7 @@ package lib
 
 import (
 	"bytes"
+	"errors"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -63,26 +64,73 @@ func Generate(targetDir, targetSrc string) error {
 	return Write(targetDir, targetSrc, filtered)
 }
 
+// FetchWorker is an async worker waiting for jobs.
+func FetchWorker(elements <-chan HashItem, results chan<- error, origin Origin, dir string) {
+	for e := range elements {
+		data, err := origin.Get(e.Name)
+		if err != nil {
+			results <- errors.New("failed to fetch file: " + e.Name)
+			continue
+		}
+		file := filepath.Join(dir, e.Name)
+		fileDir := filepath.Dir(file)
+		err = os.MkdirAll(fileDir, DefaultFileMode)
+		if err != nil {
+			results <- errors.New("failed to create folder: " + filepath.Dir(e.Name))
+			continue
+		}
+		err = ioutil.WriteFile(file, data, DefaultFileMode)
+		if err != nil {
+			results <- errors.New("failed to write file: " + e.Name)
+			continue
+		}
+		results <- nil
+	}
+}
+
+// FetchSpecificAsync downloads the files asynchronously in the set from the origin and stores it in the target directory.
+// It may fail if either can't fetch the file or can't create the directory / file.
+func FetchSpecificAsync(target string, source Origin, set HashSet, pool int) error {
+	workload := len(set)
+	jobs := make(chan HashItem, workload/2+1)
+	results := make(chan error, workload/2+1)
+
+	for i := 0; i < pool; i++ {
+		go FetchWorker(jobs, results, source, target)
+	}
+
+	for i := 0; i < workload; i++ {
+		jobs <- set[i]
+	}
+	close(jobs)
+
+	var err error
+	for i := 0; i < workload; i++ {
+		if err = <-results; err != nil {
+			log.Warning(err)
+		}
+	}
+
+	return nil
+}
+
 // FetchSpecific downloads the files in the set from the origin and stores it in the target directory.
 // It may fail if either can't fetch the file or can't create the directory / file.
 func FetchSpecific(dir string, source Origin, set HashSet) error {
 	for _, hash := range set {
 		data, err := source.Get(hash.Name)
 		if err != nil {
-			log.Error("failed to fetch file:", hash.Name)
-			return err
+			return errors.New("failed to fetch file: " + hash.Name)
 		}
 		file := filepath.Join(dir, hash.Name)
 		fileDir := filepath.Dir(file)
 		err = os.MkdirAll(fileDir, DefaultFileMode)
 		if err != nil {
-			log.Error("failed to create folder:", fileDir)
-			return err
+			return errors.New("failed to create folder: " + fileDir)
 		}
 		err = ioutil.WriteFile(file, data, DefaultFileMode)
 		if err != nil {
-			log.Error("failed to write file:", file)
-			return err
+			return errors.New("failed to write file: " + file)
 		}
 	}
 	return nil
@@ -91,7 +139,7 @@ func FetchSpecific(dir string, source Origin, set HashSet) error {
 // Fetch compares two patches from a global and a local branch and updates the local branch to match the global one.
 // It only replaces or adds files, but does not delete any.
 // It may return an error if the origin handling fails.
-func Fetch(dir, target string) error {
+func Fetch(dir, target string, pool int) error {
 	local, err := GetOrigin(dir)
 	if err != nil {
 		log.Error("bad local origin:", err)
@@ -114,7 +162,11 @@ func Fetch(dir, target string) error {
 	}
 
 	missingHashes := Compare(localHashes, globalHashes)
-	err = FetchSpecific(dir, global, missingHashes)
+	if pool < 2 {
+		err = FetchSpecific(dir, global, missingHashes)
+	} else {
+		err = FetchSpecificAsync(dir, global, missingHashes, pool)
+	}
 	if err != nil {
 		log.Error("failed to fetch files:", err)
 		return err
