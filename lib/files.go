@@ -53,10 +53,19 @@ func Write(dir, source string, data HashSet) error {
 
 // Generate creates a new patch file in the target folder storing version information.
 // It may return an error if either the hashing or patch file creation fails.
-func Generate(targetDir, targetSrc string) error {
+func Generate(targetDir, targetSrc string, pool int, dynamic bool) error {
 	filterPath := filepath.Join(targetDir, IgnoreFile)
 	filter := filter.LoadFilter(filterPath)
-	hashes, err := HashDirectory(targetDir)
+	var hashes HashSet
+	var err error
+	if pool < 2 {
+		hashes, err = HashDirectory(targetDir)
+	} else {
+		if dynamic {
+			pool *= runtime.NumCPU()
+		}
+		hashes, err = HashDirectoryAsync(targetDir, pool)
+	}
 	if err != nil {
 		log.Critical("failed to hash directory:", err)
 		return err
