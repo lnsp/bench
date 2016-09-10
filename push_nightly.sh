@@ -8,8 +8,8 @@ github-release release \
 	--repo bench \
 	--tag nightly \
 	--name "Nightly" \
-	--description "Builds only (source code is not up to date)"
-	--pre-release
+	--description "Automated build. **Careful, this release is not suited for production!**" \
+	-p
 
 for arch in *.tar.gz; do
 	github-release upload \
