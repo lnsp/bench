@@ -3,6 +3,13 @@ github-release delete \
 	--repo bench \
 	--tag nightly
 
+git config --global user.email "builds@travis-ci.com"
+git config --global user.name "Travis CI"
+git tag --delete nightly
+git push --delete origin nightly
+git tag nightly -a -m "Automated nightly builds"
+git push -q https://$GITHUB_TOKEN@github.com/lnsp/bench :nightly
+
 github-release release \
 	--user lnsp \
 	--repo bench \

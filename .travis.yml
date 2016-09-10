@@ -29,6 +29,7 @@ deploy:
   - bench_windows_amd64.exe.tar.gz
   skip_cleanup: true
   on:
+    tags: true
     branch: release
 env:
   global:
