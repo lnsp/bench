@@ -30,10 +30,7 @@ var (
 )
 
 const (
-	PatchFilePerm = 0664
-	PatchFile     = ".bpatch"
-	IgnoreFile    = ".benchignore"
-	HelpText      = `USAGE: bench [action]
+	HelpText = `USAGE: bench [action]
 
 Available actions:
 	generate - Generate patch files from active folder

@@ -12,8 +12,11 @@ import (
 )
 
 const (
-	HashSplit     = ":"
-	SourceMarker  = "#@"
+	// HashSplit is the split symbol in each pair of name / hash sets.
+	HashSplit = ":"
+	// SourceMarker is the prefix of a source identifier in a patch file.
+	SourceMarker = "#@"
+	// LineSeperator is the default line seperator.
 	LineSeperator = "\n"
 )
 
