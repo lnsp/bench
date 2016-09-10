@@ -1,0 +1,20 @@
+{
+	"ImportPath": "github.com/lnsp/bench",
+	"GoVersion": "go1.7",
+	"GodepVersion": "v74",
+	"Deps": [
+		{
+			"ImportPath": "github.com/lnsp/filematch",
+			"Rev": "9cb4f73596ae1b81c3a7c622b3253aedf353183d"
+		},
+		{
+			"ImportPath": "github.com/lnsp/filter",
+			"Rev": "80b0a02b629af468b90dbeac9a98533da24f830c"
+		},
+		{
+			"ImportPath": "github.com/lnsp/pkginfo",
+			"Comment": "v1.0.1",
+			"Rev": "13dd42ce6300965bbbb572418f83b7c470d2e999"
+		}
+	]
+}
