@@ -1,4 +1,29 @@
 language: go
-
 notifications:
   email: false
+before_deploy:
+- "./build_archives.sh"
+deploy:
+  provider: releases
+  api_key:
+    secure: oGwid2rEKM8DShqleWkdal5ASc5SpPYctbwoawyvyGkjjC/zXtfpu30jHcJShthfDbqbOolgCKi+aE7QRwiq0I1ehsyau/Q4UYnko11bE8FYm2CJ0glIAPo4o1LdBUwZvd3C8E/tMcp+CqHOnDnBqLSizqVK/QkXYIOe7LYaqoSWGZbAYJJotvQdZcXXcipjZ/5EWu5pAMX+Z7BjI/Jbs3VH7VIyfl3mqe/tNNhZqzTjmy91r1oblqcizJkG6/1kIo3VYnGbX40oQZERQWpDVV2fElrI9DoPKnkee/c/mmmqsjG2Xh6hEkEskRofQ3/LOI/oY8LOV47zCo6FFX37aGlNfatGxMeD8Wk6NUIOJAmCCjSqEXO4S4A8xz62W+c11ePhR9BU9vohJNnWmYEMlTnjFlmfuCncIBp6h84QC0yhVb7kh5ue1bg5UwamZ5aMZpSS7gqhXUyccZEDqph7VrZQjdvNT8bdUMrWdB+qe6OZStJCUNq/bBaMwYqkrwzQPpDYaH83XHnuKc5tIVo3h+6bD2k5q+rbeGjg0QSEuqp3wgEK36wcmuTE9eQPMvIjONj8tQCgvr3YF82jNDim8mw/yUOF/GRqsmGw7a7dk2t77Vj/OdlCPOf2l4zRJG9ykMwMHqC2o9uT9ZfzfIdqYD64kqTKcq1tKshkZwmkcS0=
+  file:
+  - bench_darwin_386.tar.gz
+  - bench_darwin_amd64.tar.gz
+  - bench_freebsd_386.tar.gz
+  - bench_freebsd_amd64.tar.gz
+  - bench_freebsd_arm.tar.gz
+  - bench_linux_386.tar.gz
+  - bench_linux_amd64.tar.gz
+  - bench_linux_arm.tar.gz
+  - bench_netbsd_386.tar.gz
+  - bench_netbsd_amd64.tar.gz
+  - bench_netbsd_arm.tar.gz
+  - bench_openbsd_386.tar.gz
+  - bench_openbsd_amd64.tar.gz
+  - bench_windows_386.exe.tar.gz
+  - bench_windows_amd64.exe.tar.gz
+  skip_cleanup: true
+  on:
+    branch: release
+    tags: true
