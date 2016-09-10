@@ -2,26 +2,27 @@ package lib
 
 import "testing"
 
-func TestComparePatch(t *testing.T) {
+func TestCompare(t *testing.T) {
+	SetVerbose(false)
 	testCases := []struct {
 		Local, Global, Missing HashSet
 	}{
 		{
 			HashSet{
-				GetItem("a:b"),
-				GetItem("b:c"),
+				HashItem{"a", "b"},
+				HashItem{"b", "c"},
 			}, HashSet{
-				GetItem("a:b"),
-				GetItem("b:c"),
-				GetItem("c:d"),
+				HashItem{"a", "b"},
+				HashItem{"b", "c"},
+				HashItem{"c", "d"},
 			}, HashSet{
-				GetItem("c:d"),
+				HashItem{"c", "d"},
 			},
 		},
 	}
 
 	for _, tc := range testCases {
-		result := ComparePatch(tc.Local, tc.Global)
+		result := Compare(tc.Local, tc.Global)
 		assertMap := make(map[string]bool)
 		for _, e := range tc.Missing {
 			assertMap[e.String()] = true
