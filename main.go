@@ -16,8 +16,8 @@ import (
 
 var (
 	PoolSize        = flag.Int("worker", 1, "Async worker count")
-	PatchSource     = flag.String("source", "", "Set patch source")
-	TargetDirectory = flag.String("target", ".", "Set custom working directory")
+	PatchSource     = flag.String("source", "./", "Source target")
+	TargetDirectory = flag.String("target", ".", "Local target")
 	VerboseOutput   = flag.Bool("verbose", false, "Enable verbose output")
 	PkgInfo         = pkginfo.PackageInfo{
 		Name: "bench",
