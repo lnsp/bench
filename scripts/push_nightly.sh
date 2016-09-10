@@ -9,7 +9,7 @@ git config --global user.name "Travis CI"
 git tag --delete nightly
 git push --delete origin nightly
 git tag nightly -a -m "Automated nightly builds"
-git push -q https://$GITHUB_TOKEN@github.com/lnsp/bench :nightly
+git push -q https://lnsp:$GITHUB_TOKEN@github.com/lnsp/bench :nightly
 
 github-release release \
 	--user lnsp \
