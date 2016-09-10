@@ -58,6 +58,52 @@ func Parse(data string) (HashSet, string) {
 	return hashItems, source
 }
 
+// HashWorker hashes a sequence of files and pumps the hashes back.
+func HashWorker(base string, files <-chan string, results chan<- *HashItem) {
+	relPath, err := filepath.Rel(base, active)
+	if err != nil {
+		log.Warning(err)
+		results <- nil
+		continue
+	}
+	hash, err := HashFile(active)
+	if err != nil {
+		log.Warning(err)
+		results <- nil
+		continue
+	}
+	results <- &HashItem{relPath, hash}
+}
+
+// HashDirectoryAsync walks a directory recursively and generates a slice of hash pairs.
+// A hash pair consists of the relative path from the start directory to the file
+// and the hash of the file seperated by a split string.
+// It may return an error if the file hashing or directory walking fails.
+func HashDirectoryAsync(start string, pool int) (HashSet, error) {
+	files := make(chan string, pool*2)
+	results := make(chan *HashItem, pool*2)
+	hashes := make(HashSet)
+
+	for i := 0; i < pool; i++ {
+		go HashWorker(start, files, results)
+	}
+
+	size := 0
+	err := filepath.Walk(start, func(active string, info os.FileInfo, err error) error {
+		if info.IsDir() {
+			return nil
+		}
+		go files <- active
+		size++
+	})
+
+	for i := 0; i < size; i++ {
+		hashes = append(hashes, <-results)
+	}
+
+	return hashes, err
+}
+
 // HashDirectory walks a directory recursively and generates a slice of hash pairs.
 // A hash pair consists of the relative path from the start directory to the file
 // and the hash of the file seperated by a split string.
