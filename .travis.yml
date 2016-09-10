@@ -26,6 +26,3 @@ deploy:
   - bench_windows_386.exe.tar.gz
   - bench_windows_amd64.exe.tar.gz
   skip_cleanup: true
-  on:
-    tags: true
-    branch: release
