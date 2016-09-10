@@ -11,6 +11,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"runtime"
 
 	"github.com/lnsp/filter"
 )
@@ -95,6 +96,8 @@ func FetchSpecificAsync(target string, source Origin, set HashSet, pool int) err
 	jobs := make(chan HashItem, workload/2+1)
 	results := make(chan error, workload/2+1)
 
+	log.Notice("using", pool, "workers")
+
 	for i := 0; i < pool; i++ {
 		go FetchWorker(jobs, results, source, target)
 	}
@@ -139,7 +142,7 @@ func FetchSpecific(dir string, source Origin, set HashSet) error {
 // Fetch compares two patches from a global and a local branch and updates the local branch to match the global one.
 // It only replaces or adds files, but does not delete any.
 // It may return an error if the origin handling fails.
-func Fetch(dir, target string, pool int) error {
+func Fetch(dir, target string, pool int, dynamic bool) error {
 	local, err := GetOrigin(dir)
 	if err != nil {
 		log.Error("bad local origin:", err)
@@ -165,6 +168,9 @@ func Fetch(dir, target string, pool int) error {
 	if pool < 2 {
 		err = FetchSpecific(dir, global, missingHashes)
 	} else {
+		if dynamic {
+			pool *= runtime.NumCPU()
+		}
 		err = FetchSpecificAsync(dir, global, missingHashes, pool)
 	}
 	if err != nil {

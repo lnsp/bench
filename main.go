@@ -15,10 +15,11 @@ import (
 )
 
 var (
+	DynamicPool     = flag.Bool("dynamic", true, "Dynamic worker pool")
 	PoolSize        = flag.Int("worker", 1, "Async worker count")
 	PatchSource     = flag.String("source", "./", "Source target")
-	TargetDirectory = flag.String("target", ".", "Local target")
-	VerboseOutput   = flag.Bool("verbose", false, "Enable verbose output")
+	TargetDirectory = flag.String("target", "./", "Local target")
+	VerboseOutput   = flag.Bool("verbose", false, "Verbose logging")
 	PkgInfo         = pkginfo.PackageInfo{
 		Name: "bench",
 		Version: pkginfo.PackageVersion{
@@ -40,10 +41,11 @@ Available actions:
 	help - Display command overview
 
 Available flags:
-	--target - Set custom working directory
-	--verbose - Enable verbose output
-	--source - Set patch source
-	--worker - Async worker count (default 1)`
+	--target - Local target (default "./")
+	--verbose - Verbose logging (default false)
+	--source - Source target (default "./")
+	--worker - Async worker count (default 1)
+	--dynamic - Dynamic worker count (default true)`
 )
 
 func main() {
@@ -57,7 +59,7 @@ func main() {
 	case "generate":
 		lib.Generate(workingDir, *PatchSource)
 	case "fetch":
-		lib.Fetch(workingDir, *PatchSource, *PoolSize)
+		lib.Fetch(workingDir, *PatchSource, *PoolSize, *DynamicPool)
 	case "version":
 		printVersion()
 	case "help":
