@@ -1,4 +1,4 @@
-Bench [![Build Status](https://travis-ci.com/lnsp/bench.svg?token=LqZfkQKrVSBE6pgAPyCG&branch=develop)](https://travis-ci.com/lnsp/bench)
+Bench [![Build Status](https://travis-ci.org/lnsp/bench.svg?token=LqZfkQKrVSBE6pgAPyCG&branch=develop)](https://travis-ci.org/lnsp/bench)
 ========
 
 Bench is a file patch system using HTTPS and secure file hashing.
