@@ -57,7 +57,7 @@ func main() {
 	command := flag.Arg(0)
 	switch command {
 	case "generate":
-		lib.Generate(workingDir, *PatchSource)
+		lib.Generate(workingDir, *PatchSource, *PoolSize, *DynamicPool)
 	case "fetch":
 		lib.Fetch(workingDir, *PatchSource, *PoolSize, *DynamicPool)
 	case "version":
