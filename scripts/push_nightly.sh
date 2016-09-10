@@ -3,6 +3,7 @@ github-release delete \
 	--repo bench \
 	--tag nightly
 
+cd $GOPATH/src/github.com/lnsp/bench/
 git config --global user.email "builds@travis-ci.com"
 git config --global user.name "Travis CI"
 git tag --delete nightly

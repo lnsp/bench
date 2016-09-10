@@ -5,8 +5,8 @@ install:
 notifications:
   email: false
 after_success:
-- "./build_archives.sh"
-- "./push_nightly.sh"
+- "scripts/build_archives.sh"
+- "scripts/push_nightly.sh"
 deploy:
   provider: releases
   api_key:
