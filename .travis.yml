@@ -1,4 +1,6 @@
 language: go
+install:
+  - go get github.com/mitchellh/gox
 notifications:
   email: false
 before_deploy:
@@ -25,5 +27,5 @@ deploy:
   - bench_windows_amd64.exe.tar.gz
   skip_cleanup: true
   on:
-    branch: release
     tags: true
+    branch: release
