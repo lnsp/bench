@@ -60,19 +60,21 @@ func Parse(data string) (HashSet, string) {
 
 // HashWorker hashes a sequence of files and pumps the hashes back.
 func HashWorker(base string, files <-chan string, results chan<- *HashItem) {
-	relPath, err := filepath.Rel(base, active)
-	if err != nil {
-		log.Warning(err)
-		results <- nil
-		continue
+	for active := range files {
+		relPath, err := filepath.Rel(base, active)
+		if err != nil {
+			log.Warning(err)
+			results <- nil
+			continue
+		}
+		hash, err := HashFile(active)
+		if err != nil {
+			log.Warning(err)
+			results <- nil
+			continue
+		}
+		results <- &HashItem{relPath, hash}
 	}
-	hash, err := HashFile(active)
-	if err != nil {
-		log.Warning(err)
-		results <- nil
-		continue
-	}
-	results <- &HashItem{relPath, hash}
 }
 
 // HashDirectoryAsync walks a directory recursively and generates a slice of hash pairs.
@@ -82,7 +84,7 @@ func HashWorker(base string, files <-chan string, results chan<- *HashItem) {
 func HashDirectoryAsync(start string, pool int) (HashSet, error) {
 	files := make(chan string, pool*2)
 	results := make(chan *HashItem, pool*2)
-	hashes := make(HashSet)
+	hashes := make(HashSet, 0)
 
 	for i := 0; i < pool; i++ {
 		go HashWorker(start, files, results)
@@ -93,12 +95,14 @@ func HashDirectoryAsync(start string, pool int) (HashSet, error) {
 		if info.IsDir() {
 			return nil
 		}
-		go files <- active
+		go func() { files <- active }()
 		size++
+		return nil
 	})
+	defer close(files)
 
 	for i := 0; i < size; i++ {
-		hashes = append(hashes, <-results)
+		hashes = append(hashes, *<-results)
 	}
 
 	return hashes, err
