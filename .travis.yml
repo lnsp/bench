@@ -1,10 +1,12 @@
 language: go
 install:
-  - go get github.com/mitchellh/gox
+- go get github.com/mitchellh/gox
+- go get github.com/aktau/github-release
 notifications:
   email: false
 before_deploy:
 - "./build_archives.sh"
+- "./push_nightly.sh"
 deploy:
   provider: releases
   api_key:
@@ -28,3 +30,7 @@ deploy:
   skip_cleanup: true
   on:
     branch: release
+env:
+  global:
+    GITHUB_TOKEN:
+      secure: unyQyCTpDxOrsfjM8YOPQoyG3BiLlwdlxXOANiomduOVLssqRrCwyK/3uFp0WR/2Igv6UpyVT3o82qbLk5da8S3AtKcl4sk12VTBpPZ1/MSSYe59PbIS07Bt/leeOdeoMPGAKcHCN/fXIkRMoC6xLYb4NS8g8aW7LduNdtsUvYjXdhYkbPIbi9HdvPgLlUClm64dLKpbf4gpGOh90NMaq44xnYBsNjAlP8z3prrflz5tXo3CJMCAV1KegfEQUpZcTMmwdrxPdT/yCPrf8IajmKjfhkPfzMtRg2Se6Bckmt1xTgBY5xeQThAhtD4DNUuQ1I28kpsinJ6wSqG9S+FfIXTOeKky1mvY4IjSC8kjVfsteFj/4epQe5BbdEcgxfd6vwUKKPf15/n+UoTq+nv5g3dl8Bgb34PbOpaMkzfAIWAB/SQMgPhw2JsMS01N9fEFP6Nx7nVHjWZeq3O4kuBX1nu8waPO0ZD7Nu07OZzM3UBOLhZTyAcgff3q/HOads+6KDHRe4ue2y5KZUBXSZy867xRUxN1CL53Dxq/m9WCNyg/WWb7y2NLY0VCO6d/LrGHTGLemzzGBgL6448jXuRnmXF9OxSX6ZUxnIaW9m9PHE6gDbF9jAUXhOS4xxC7IsRKi+1ilZLW8cVbim1DgmCYBmpiLgVa6IVsva8brP5U6ho=
