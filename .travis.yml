@@ -6,7 +6,6 @@ notifications:
   email: false
 after_success:
 - "scripts/build_archives.sh"
-- "scripts/push_nightly.sh"
 deploy:
   provider: releases
   api_key:
@@ -31,9 +30,3 @@ deploy:
   on:
     tags: true
     branch: release
-branches:
-  except:
-    - nightly
-env:
-  global:
-    secure: HXbH8onw4fcx/qlLPBF5TlxI7kPb/koJ23DAS++8lggwaRjaaVdMQCzlWI6YQr34LcLM1D0ZU/E6VBHV54rW6XNLz1MtnSVQ8NhJ24lwLNsp9gcEPydciCmCPpLJooUjy6Fr98EKdGjOuogsoL7YHvq0RfwiqeNMrrlLa+lkx022TP6RE1WS4GzR2w6iBp3NVUU7iiogO73jZgSz1fxQfPTz4/HbPSeNteFCdIhxpb0/qiVtexohLKYMd/TYnHhp+zbGkuTsIHaTt2d9OGH8YR/VllLtCc3w5ai1DlDCJkazoHLaNhGKUJhg58F1knaih/sbD0EOkBpStg6OsnxsZjNjB7gJRidcDoZlSCVNEZvUWRM8gLUZRPGCnhdXKZJGXgBlkYNtO6hCzchjB6B/3c1iNdhoY7BdSPhQ+I5kcQHsPkKUMI6x1PvkNCWDsaLt6vSjNPGjHt60Yvzgm/ewjy43qk3U0GuFbJY1seVgMT+wjAweuQu/7nA4F72x5/K8loAK53IPErANHb0vhwNdmW/s+Irm2tpKglgcKpW5IDGao9am7tQLpUGsJvHD0qlFW8j6xrSmSbRlhwNM78zOKFtLCTtrWJuoeYkWfSr+ENGm2rOEy2n3Ee4EZqY5dV3uBFcFeEcBuSM6m9qql/3/w7tawh2jZSBL9XHfR4x9/NU=
