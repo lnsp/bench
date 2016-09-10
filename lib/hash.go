@@ -15,7 +15,6 @@ const (
 	HashSplit     = ":"
 	SourceMarker  = "#@"
 	LineSeperator = "\n"
-	LogName       = "bench-lib"
 )
 
 // HashSet is a collection of hash items.
