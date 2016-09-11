@@ -60,23 +60,29 @@ func Parse(data string) (HashSet, string) {
 }
 
 // HashWorker hashes a sequence of files and pumps the hashes back.
-func HashWorker(base string, files <-chan string, results chan<- *HashItem, wg *sync.WaitGroup) {
+func HashWorker(base string, files <-chan string, results chan<- HashItem, done *uint64) {
 	for active := range files {
 		relPath, err := filepath.Rel(base, active)
 		if err != nil {
 			log.Warning(err)
-			results <- nil
 			continue
 		}
 		hash, err := HashFile(active)
 		if err != nil {
 			log.Warning(err)
-			results <- nil
 			continue
 		}
-		results <- &HashItem{relPath, hash}
+		results <- HashItem{relPath, hash}
 	}
-	wg.Done()
+	atomic.AddUint64(done, ^uint64(0))
+}
+
+func CollectWorker(active *uint64, hashes <-chan HashItem, collector chan<- HashSet) {
+	var h HashSet
+	for *active > 0 {
+		h = append(h, <-hashes)
+	}
+	collector <- h
 }
 
 // HashDirectoryAsync walks a directory recursively and generates a slice of hash pairs.
@@ -84,20 +90,17 @@ func HashWorker(base string, files <-chan string, results chan<- *HashItem, wg *
 // and the hash of the file seperated by a split string.
 // It may return an error if the file hashing or directory walking fails.
 func HashDirectoryAsync(start string, pool int) (HashSet, error) {
-	var group sync.WaitGroup
-	files := make(chan string, pool*2)
-	results := make(chan *HashItem, pool*2)
-	hashes := make(HashSet, 0)
+	files := make(chan string, pool*pool)
+	results := make(chan HashItem, pool*pool)
+	collector := make(chan HashSet)
+	workers := uint64(pool)
 
 	for i := 0; i < pool; i++ {
-		go HashWorker(start, files, results, group)
+		log.Notice("starting worker", i)
+		go HashWorker(start, files, results, &workers)
 	}
 
-	go func() {
-		for workers > 0 {
-			hashes = append(hashes, *<-results)
-		}
-	}()
+	go CollectWorker(&workers, results, collector)
 
 	err := filepath.Walk(start, func(active string, info os.FileInfo, err error) error {
 		if info.IsDir() {
@@ -112,7 +115,7 @@ func HashDirectoryAsync(start string, pool int) (HashSet, error) {
 		return HashSet{}, nil
 	}
 
-	return hashes, nil
+	return <-collector, nil
 }
 
 // HashDirectory walks a directory recursively and generates a slice of hash pairs.
