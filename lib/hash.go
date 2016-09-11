@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync/atomic"
 
 	"github.com/lnsp/filter"
 )
@@ -59,7 +60,7 @@ func Parse(data string) (HashSet, string) {
 }
 
 // HashWorker hashes a sequence of files and pumps the hashes back.
-func HashWorker(base string, files <-chan string, results chan<- *HashItem) {
+func HashWorker(base string, files <-chan string, results chan<- *HashItem, wg *sync.WaitGroup) {
 	for active := range files {
 		relPath, err := filepath.Rel(base, active)
 		if err != nil {
@@ -75,6 +76,7 @@ func HashWorker(base string, files <-chan string, results chan<- *HashItem) {
 		}
 		results <- &HashItem{relPath, hash}
 	}
+	wg.Done()
 }
 
 // HashDirectoryAsync walks a directory recursively and generates a slice of hash pairs.
@@ -82,30 +84,35 @@ func HashWorker(base string, files <-chan string, results chan<- *HashItem) {
 // and the hash of the file seperated by a split string.
 // It may return an error if the file hashing or directory walking fails.
 func HashDirectoryAsync(start string, pool int) (HashSet, error) {
+	var group sync.WaitGroup
 	files := make(chan string, pool*2)
 	results := make(chan *HashItem, pool*2)
 	hashes := make(HashSet, 0)
 
 	for i := 0; i < pool; i++ {
-		go HashWorker(start, files, results)
+		go HashWorker(start, files, results, group)
 	}
 
-	size := 0
+	go func() {
+		for workers > 0 {
+			hashes = append(hashes, *<-results)
+		}
+	}()
+
 	err := filepath.Walk(start, func(active string, info os.FileInfo, err error) error {
 		if info.IsDir() {
 			return nil
 		}
-		go func() { files <- active }()
-		size++
+		files <- active
 		return nil
 	})
-	defer close(files)
+	close(files)
 
-	for i := 0; i < size; i++ {
-		hashes = append(hashes, *<-results)
+	if err != nil {
+		return HashSet{}, nil
 	}
 
-	return hashes, err
+	return hashes, nil
 }
 
 // HashDirectory walks a directory recursively and generates a slice of hash pairs.
