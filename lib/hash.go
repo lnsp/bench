@@ -11,7 +11,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"sync/atomic"
 
 	"github.com/lnsp/filter"
 )
@@ -59,30 +58,18 @@ func Parse(data string) (HashSet, string) {
 	return hashItems, source
 }
 
-// HashWorker hashes a sequence of files and pumps the hashes back.
-func HashWorker(base string, files <-chan string, results chan<- HashItem, done *uint64) {
-	for active := range files {
-		relPath, err := filepath.Rel(base, active)
+func HashWorker(base string, files <-chan string, results chan<- *HashItem) {
+	for file := range files {
+		hash, err := HashFile(filepath.Join(base, file))
 		if err != nil {
-			log.Warning(err)
-			continue
+			results <- nil
+		} else {
+			results <- &HashItem{
+				Name: file,
+				Hash: hash,
+			}
 		}
-		hash, err := HashFile(active)
-		if err != nil {
-			log.Warning(err)
-			continue
-		}
-		results <- HashItem{relPath, hash}
 	}
-	atomic.AddUint64(done, ^uint64(0))
-}
-
-func CollectWorker(active *uint64, hashes <-chan HashItem, collector chan<- HashSet) {
-	var h HashSet
-	for *active > 0 {
-		h = append(h, <-hashes)
-	}
-	collector <- h
 }
 
 // HashDirectoryAsync walks a directory recursively and generates a slice of hash pairs.
@@ -90,32 +77,47 @@ func CollectWorker(active *uint64, hashes <-chan HashItem, collector chan<- Hash
 // and the hash of the file seperated by a split string.
 // It may return an error if the file hashing or directory walking fails.
 func HashDirectoryAsync(start string, pool int) (HashSet, error) {
-	files := make(chan string, pool*pool)
-	results := make(chan HashItem, pool*pool)
-	collector := make(chan HashSet)
-	workers := uint64(pool)
-
-	for i := 0; i < pool; i++ {
-		log.Notice("starting worker", i)
-		go HashWorker(start, files, results, &workers)
-	}
-
-	go CollectWorker(&workers, results, collector)
-
+	jobs := make([]string, 0)
 	err := filepath.Walk(start, func(active string, info os.FileInfo, err error) error {
+		// ignore directories
 		if info.IsDir() {
 			return nil
 		}
-		files <- active
+		relPath, err := filepath.Rel(start, active)
+		if err != nil {
+			log.Warning("invalid path:", err)
+			return err
+		}
+		jobs = append(jobs, relPath)
 		return nil
 	})
-	close(files)
-
 	if err != nil {
-		return HashSet{}, nil
+		return HashSet{}, err
 	}
 
-	return <-collector, nil
+	workload := len(jobs)
+	files := make(chan string, workload/2+1)
+	results := make(chan *HashItem, workload/2+1)
+
+	for i := 0; i < pool; i++ {
+		go HashWorker(start, files, results)
+	}
+
+	for i := 0; i < workload; i++ {
+		files <- jobs[i]
+	}
+	close(files)
+
+	var set HashSet
+	for i := 0; i < workload; i++ {
+		r := <-results
+		if r != nil {
+			continue
+		}
+		set = append(set, *r)
+	}
+
+	return set, nil
 }
 
 // HashDirectory walks a directory recursively and generates a slice of hash pairs.
