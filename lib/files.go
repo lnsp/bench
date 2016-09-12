@@ -190,3 +190,22 @@ func Fetch(dir, target string, pool int, dynamic bool) error {
 
 	return Write(dir, globalSource, globalHashes)
 }
+
+// ListFiles list all files in a directory including subdirectories.
+// It may return an error if the recursive walking fails.
+func ListFiles(dir string) ([]string, error) {
+	var files []string
+	err := filepath.Walk(dir, func(active string, info os.FileInfo, err error) error {
+		// ignore directories
+		if info.IsDir() {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		rel, err := filepath.Rel(dir, active)
+		files = append(files, rel)
+		return nil
+	})
+	return files, err
+}

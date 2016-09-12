@@ -8,7 +8,6 @@ import (
 	"crypto/sha1"
 	"encoding/hex"
 	"io/ioutil"
-	"os"
 	"path/filepath"
 	"strings"
 
@@ -77,25 +76,14 @@ func HashWorker(base string, files <-chan string, results chan<- *HashItem) {
 // and the hash of the file seperated by a split string.
 // It may return an error if the file hashing or directory walking fails.
 func HashDirectoryAsync(start string, pool int) (HashSet, error) {
-	jobs := make([]string, 0)
-	err := filepath.Walk(start, func(active string, info os.FileInfo, err error) error {
-		// ignore directories
-		if info.IsDir() {
-			return nil
-		}
-		relPath, err := filepath.Rel(start, active)
-		if err != nil {
-			log.Warning("invalid path:", err)
-			return err
-		}
-		jobs = append(jobs, relPath)
-		return nil
-	})
+	var set HashSet
+	jobs, err := ListFiles(start)
 	if err != nil {
-		return HashSet{}, err
+		return set, err
 	}
 
-	workload := len(jobs)
+	offset, workload := 0, len(jobs)
+	set = make(HashSet, workload)
 	files := make(chan string, workload/2+1)
 	results := make(chan *HashItem, workload/2+1)
 
@@ -108,16 +96,17 @@ func HashDirectoryAsync(start string, pool int) (HashSet, error) {
 	}
 	close(files)
 
-	var set HashSet
 	for i := 0; i < workload; i++ {
 		r := <-results
 		if r != nil {
+			offset++
 			continue
+		} else {
+			set[i-offset] = *r
 		}
-		set = append(set, *r)
 	}
 
-	return set, nil
+	return set[:(workload - offset)], nil
 }
 
 // HashDirectory walks a directory recursively and generates a slice of hash pairs.
@@ -125,31 +114,25 @@ func HashDirectoryAsync(start string, pool int) (HashSet, error) {
 // and the hash of the file seperated by a split string.
 // It may return an error if the file hashing or directory walking fails.
 func HashDirectory(start string) (HashSet, error) {
-	var hashPairs HashSet
-	err := filepath.Walk(start, func(active string, info os.FileInfo, err error) error {
-		if info.IsDir() {
-			return nil
-		}
-		relPath, err := filepath.Rel(start, active)
-		if err != nil {
-			log.Warning(err)
-			return err
-		}
-		hash, err := HashFile(active)
-		if err != nil {
-			log.Warning(err)
-			return err
-		}
-		hashPairs = append(hashPairs, HashItem{relPath, hash})
-		return nil
-	})
-
+	var set HashSet
+	files, err := ListFiles(start)
 	if err != nil {
-		log.Error(err)
-		return nil, err
+		return set, err
 	}
 
-	return hashPairs, err
+	offset, workload := 0, len(files)
+	set = make(HashSet, workload)
+	for i, element := range files {
+		path := filepath.Join(start, element)
+		hash, err := HashFile(path)
+		if err != nil {
+			offset++
+			continue
+		}
+		set[i-offset] = HashItem{element, hash}
+	}
+
+	return set[:(workload - offset)], nil
 }
 
 // HashFile return a hex-encoded SHA-1 hash string of the file.
