@@ -98,7 +98,7 @@ func HashDirectoryAsync(start string, pool int) (HashSet, error) {
 
 	for i := 0; i < workload; i++ {
 		r := <-results
-		if r != nil {
+		if r == nil {
 			offset++
 			continue
 		} else {
