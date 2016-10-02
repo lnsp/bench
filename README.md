@@ -1,4 +1,4 @@
-Bench [![Build Status](https://travis-ci.org/lnsp/bench.svg?&branch=develop)](https://travis-ci.org/lnsp/bench)
+Bench [![Go Report Card](https://goreportcard.com/badge/github.com/lnsp/bench)](https://goreportcard.com/report/github.com/lnsp/bench) [![Build Status](https://travis-ci.org/lnsp/bench.svg?&branch=develop)](https://travis-ci.org/lnsp/bench)
 ========
 
 Bench is a file patch system using HTTP(S) and SHA-1 hashing.
