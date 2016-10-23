@@ -3,6 +3,9 @@ Bench [![Go Report Card](https://goreportcard.com/badge/github.com/lnsp/bench)](
 
 Bench is a file patch system using HTTP(S) and SHA-1 hashing.
 
+## Installation
+Run `go get github.com/lnsp/bench/cmd/bench` to install the `bench` binary.
+
 ## Usage guide
 **Important:** Your working folder is automatically made the target folder for patch generation and fetching. To change this behavior, use the `--target "my-target"` flag to chose your target independently from your working directory.
 
