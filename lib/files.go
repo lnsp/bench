@@ -19,6 +19,7 @@ import (
 const (
 	// DefaultFileMode is the default file and directory mode.
 	DefaultFileMode = 0644
+	DefaultDirMode = 0755
 	// PatchFile is the default patch file name.
 	PatchFile = ".patch"
 	// IgnoreFile is the default ignore file name.
@@ -84,7 +85,7 @@ func FetchWorker(elements <-chan HashItem, results chan<- error, origin Origin, 
 		}
 		file := filepath.Join(dir, e.Name)
 		fileDir := filepath.Dir(file)
-		err = os.MkdirAll(fileDir, DefaultFileMode)
+		err = os.MkdirAll(fileDir, DefaultDirMode)
 		if err != nil {
 			results <- errors.New("failed to create folder: " + filepath.Dir(e.Name))
 			continue
@@ -136,7 +137,7 @@ func FetchSpecific(dir string, source Origin, set HashSet) error {
 		}
 		file := filepath.Join(dir, hash.Name)
 		fileDir := filepath.Dir(file)
-		err = os.MkdirAll(fileDir, DefaultFileMode)
+		err = os.MkdirAll(fileDir, DefaultDirMode)
 		if err != nil {
 			return errors.New("failed to create folder: " + fileDir)
 		}
