@@ -3,6 +3,7 @@ install:
 - go get github.com/mitchellh/gox
 - go get github.com/aktau/github-release
 - go get github.com/lnsp/go-filter
+- go get github.com/op/go-logging
 - go get github.com/lnsp/go-filematch
 - go get github.com/lnsp/pkginfo
 
