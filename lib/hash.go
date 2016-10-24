@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/lnsp/filter"
+	"github.com/lnsp/go-filter"
 )
 
 const (
