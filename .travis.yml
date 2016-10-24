@@ -2,6 +2,9 @@ language: go
 install:
 - go get github.com/mitchellh/gox
 - go get github.com/aktau/github-release
+- go get github.com/lnsp/go-filter
+- go get github.com/lnsp/go-filematch
+
 notifications:
   email: false
 before_deploy:
