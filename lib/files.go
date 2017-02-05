@@ -13,12 +13,13 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/lnsp/filter"
+	"github.com/lnsp/go-filter"
 )
 
 const (
 	// DefaultFileMode is the default file and directory mode.
 	DefaultFileMode = 0644
+	DefaultDirMode = 0755
 	// PatchFile is the default patch file name.
 	PatchFile = ".patch"
 	// IgnoreFile is the default ignore file name.
@@ -84,7 +85,7 @@ func FetchWorker(elements <-chan HashItem, results chan<- error, origin Origin, 
 		}
 		file := filepath.Join(dir, e.Name)
 		fileDir := filepath.Dir(file)
-		err = os.MkdirAll(fileDir, DefaultFileMode)
+		err = os.MkdirAll(fileDir, DefaultDirMode)
 		if err != nil {
 			results <- errors.New("failed to create folder: " + filepath.Dir(e.Name))
 			continue
@@ -136,7 +137,7 @@ func FetchSpecific(dir string, source Origin, set HashSet) error {
 		}
 		file := filepath.Join(dir, hash.Name)
 		fileDir := filepath.Dir(file)
-		err = os.MkdirAll(fileDir, DefaultFileMode)
+		err = os.MkdirAll(fileDir, DefaultDirMode)
 		if err != nil {
 			return errors.New("failed to create folder: " + fileDir)
 		}
@@ -189,4 +190,23 @@ func Fetch(dir, target string, pool int, dynamic bool) error {
 	log.Notice("fetched", len(missingHashes), "files from origin")
 
 	return Write(dir, globalSource, globalHashes)
+}
+
+// ListFiles list all files in a directory including subdirectories.
+// It may return an error if the recursive walking fails.
+func ListFiles(dir string) ([]string, error) {
+	var files []string
+	err := filepath.Walk(dir, func(active string, info os.FileInfo, err error) error {
+		// ignore directories
+		if info.IsDir() {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		rel, err := filepath.Rel(dir, active)
+		files = append(files, rel)
+		return nil
+	})
+	return files, err
 }
