@@ -57,6 +57,7 @@ func Parse(data string) (HashSet, string) {
 	return hashItems, source
 }
 
+// HashWorker waits for files, hashes them and sends back the result.
 func HashWorker(base string, files <-chan string, results chan<- *HashItem) {
 	for file := range files {
 		hash, err := HashFile(filepath.Join(base, file))
@@ -149,7 +150,7 @@ func HashFile(path string) (string, error) {
 	return hexString, nil
 }
 
-// generateHash generates a SHA-1 hash of the input data.
+// GenerateHash generates a SHA-1 hash of the input data.
 func GenerateHash(data []byte) []byte {
 	sha := sha1.New()
 	sha.Write(data)

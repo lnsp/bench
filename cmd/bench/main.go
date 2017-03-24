@@ -15,12 +15,18 @@ import (
 )
 
 var (
-	DynamicPool     = flag.Bool("dynamic", true, "Dynamic worker pool")
-	PoolSize        = flag.Int("worker", 1, "Async worker count")
-	PatchSource     = flag.String("source", "./", "Source target")
+	// DynamicPool controls the state of the worker pool allocation.
+	DynamicPool = flag.Bool("dynamic", true, "Dynamic worker pool")
+	// PoolSize sets the target worker count.
+	PoolSize = flag.Int("worker", 1, "Async worker count")
+	// PatchSource sets the source target.
+	PatchSource = flag.String("source", "./", "Source target")
+	// TargetDirectory sets the targeted folder.
 	TargetDirectory = flag.String("target", "./", "Local target")
-	VerboseOutput   = flag.Bool("verbose", false, "Verbose logging")
-	PkgInfo         = pkginfo.PackageInfo{
+	// VerboseOutput enables debug logging output.
+	VerboseOutput = flag.Bool("verbose", false, "Verbose logging")
+	// PkgInfo stores information about the software package.
+	PkgInfo = pkginfo.PackageInfo{
 		Name: "bench",
 		Version: pkginfo.PackageVersion{
 			Major: 0,
@@ -31,6 +37,7 @@ var (
 )
 
 const (
+	// HelpText stores help text shown when running bench without parameters.
 	HelpText = `USAGE: bench [action]
 
 Available actions:

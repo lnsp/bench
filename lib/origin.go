@@ -28,6 +28,7 @@ type HTTPOrigin struct {
 	Base string
 }
 
+// Get retrieves a file from the server.
 func (h HTTPOrigin) Get(file string) ([]byte, error) {
 	requestURL, err := url.Parse(h.Base)
 	if err != nil {
@@ -49,6 +50,7 @@ func (h HTTPOrigin) Get(file string) ([]byte, error) {
 	return buf, nil
 }
 
+// Scan fetches the hash set from the HTTP server.
 func (h HTTPOrigin) Scan() (HashSet, string, error) {
 	data, err := h.Get(PatchFile)
 	if err != nil {
@@ -65,6 +67,7 @@ type FileOrigin struct {
 	Path string
 }
 
+// Scan fetches the hash set from the file system.
 func (origin FileOrigin) Scan() (HashSet, string, error) {
 	data, err := origin.Get(PatchFile)
 	if err != nil {
@@ -76,6 +79,7 @@ func (origin FileOrigin) Scan() (HashSet, string, error) {
 	return items, source, nil
 }
 
+// Get reads the file from the file system.
 func (origin FileOrigin) Get(file string) ([]byte, error) {
 	data, err := ioutil.ReadFile(filepath.Join(origin.Path, file))
 	if err != nil {
