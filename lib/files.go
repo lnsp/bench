@@ -19,7 +19,7 @@ import (
 const (
 	// DefaultFileMode is the default file and directory mode.
 	DefaultFileMode = 0644
-	DefaultDirMode = 0755
+	DefaultDirMode  = 0755
 	// PatchFile is the default patch file name.
 	PatchFile = ".patch"
 	// IgnoreFile is the default ignore file name.
@@ -33,13 +33,13 @@ func Write(dir, source string, data HashSet) error {
 	joinBuffer, size := bytes.Buffer{}, len(data)
 	// append source if it exists
 	if source != "" {
-		joinBuffer.WriteString(SourceMarker + source + LineSeperator)
+		joinBuffer.WriteString(SourceMarker + source + LineSeparator)
 		log.Notice("generated patch with source", source)
 	}
 	// store all datasets in the file
 	for i := 0; i < size; i++ {
 		joinBuffer.WriteString(data[i].String())
-		joinBuffer.WriteString(LineSeperator)
+		joinBuffer.WriteString(LineSeparator)
 	}
 	outputFile, err := os.Create(target)
 	if err != nil {

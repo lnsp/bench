@@ -19,8 +19,8 @@ const (
 	HashSplit = ":"
 	// SourceMarker is the prefix of a source identifier in a patch file.
 	SourceMarker = "#@"
-	// LineSeperator is the default line seperator.
-	LineSeperator = "\n"
+	// LineSeparator is the default line Separator.
+	LineSeparator = "\n"
 )
 
 // HashSet is a collection of hash items.
@@ -38,7 +38,7 @@ func (hs HashItem) String() string {
 
 // Parse parses a patch file and returns the parsed items.
 func Parse(data string) (HashSet, string) {
-	items := strings.Split(data, LineSeperator)
+	items := strings.Split(data, LineSeparator)
 	hashItems := make(HashSet, 0, len(items))
 	source := ""
 	for _, e := range items {
@@ -73,7 +73,7 @@ func HashWorker(base string, files <-chan string, results chan<- *HashItem) {
 
 // HashDirectoryAsync walks a directory recursively and generates a slice of hash pairs.
 // A hash pair consists of the relative path from the start directory to the file
-// and the hash of the file seperated by a split string.
+// and the hash of the file separated by a split string.
 // It may return an error if the file hashing or directory walking fails.
 func HashDirectoryAsync(start string, pool int) (HashSet, error) {
 	var set HashSet
@@ -111,7 +111,7 @@ func HashDirectoryAsync(start string, pool int) (HashSet, error) {
 
 // HashDirectory walks a directory recursively and generates a slice of hash pairs.
 // A hash pair consists of the relative path from the start directory to the file
-// and the hash of the file seperated by a split string.
+// and the hash of the file separated by a split string.
 // It may return an error if the file hashing or directory walking fails.
 func HashDirectory(start string) (HashSet, error) {
 	var set HashSet

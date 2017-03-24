@@ -13,7 +13,7 @@ import (
 	"strings"
 )
 
-// Origin is a accessable data store.
+// Origin is a accessible data store.
 type Origin interface {
 	// Scan fetches the stored HashSet and source name from the origin.
 	// It may return an error if the set is not accessible.
